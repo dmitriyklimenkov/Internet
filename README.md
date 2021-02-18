@@ -214,7 +214,7 @@ Username:
 Сессия поднимается.
 
 # 5. Настроите статический NAT(PAT) для офиса Чокурдах.
-Т.к. в офисе Чокурдах нет BGP, необходимо создать secondary адреса, пул выделенных адресов, настроить prefix-list, через route-map матчить адреса и привязать route-map к NAT.
+Т.к. в офисе Чокурдах нет BGP, необходимо создать secondary адреса и прописать трансляцию для хостов.
 
 ```
 !
@@ -249,23 +249,12 @@ interface Ethernet0/2.4
  ip policy route-map TO_R25
 !
 
-ip nat pool POOL1 28.20.20.10 28.20.20.10 netmask 255.255.255.0
-ip nat pool POOL2 28.20.20.20 28.20.20.20 netmask 255.255.255.0
-ip nat source route-map NAT30 pool POOL1 overload
-ip nat source route-map NAT300 pool POOL2 overload
 
 ip route 28.20.20.0 255.255.255.0 null0
+ip route 28.20.30.0 255.255.255.0 null0
 
-!
-route-map NAT30 permit 10
- match ip address prefix-list NAT1
- match interface Ethernet0/0
-!
-route-map NAT300 permit 10
- match ip address prefix-list NAT1
- match interface Ethernet0/1
-!
-ip prefix-list NAT1 seq 5 permit 201.193.45.0/24
+ip nat inside source static 201.193.45.2 28.20.20.10
+ip nat inside source static 201.193.45.67 28.20.30.10
 ```
 
 # 6. Настроите для IPv4 DHCP сервер в офисе Москва на маршрутизаторах R12 и R13. VPC1 и VPC7 должны получать сетевые настройки по DHCP.
